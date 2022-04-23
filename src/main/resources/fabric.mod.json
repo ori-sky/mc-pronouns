@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "pronouns",
+  "version": "0.1.0",
+
+  "name": "Ori's Pronouns Mod",
+  "description": "Description.",
+  "authors": [
+    "Ori Sky"
+  ],
+  "contact": {
+    "homepage": "https://github.com/ori-sky/mc-pronouns",
+    "sources": "https://github.com/ori-sky/mc-pronouns"
+  },
+
+  "license": "AGPL-3.0-or-later",
+  "icon": "assets/pronouns/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "mx.ori.pronouns.PronounsMod"
+    ]
+  },
+  "mixins": [
+    "pronouns.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "fabric": "*",
+    "minecraft": "1.18.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
