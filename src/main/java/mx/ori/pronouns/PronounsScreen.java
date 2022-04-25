@@ -4,7 +4,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
-import net.minecraft.client.gui.screen.option.LanguageOptionsScreen;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.GameOptions;
@@ -47,7 +46,8 @@ public class PronounsScreen extends GameOptionsScreen {
         addDrawableChild(new ButtonWidget(width / 2 - 75, height - 38, 150, 20, ScreenTexts.DONE, (button) -> {
             var entry = pronounsSelectionList.getSelectedOrNull();
             if(entry != null) {
-                PronounsMod.myPronouns = entry.pronouns;
+                PronounsMod.CONFIG.pronouns = entry.pronouns;
+                PronounsMod.CONFIG.save();
             }
             close();
         }));
@@ -67,10 +67,11 @@ public class PronounsScreen extends GameOptionsScreen {
 
             addEntry(new PronounsEntry());
             for (String pronouns : PronounsScreen.pronounsCollection) {
-                addEntry(new PronounsEntry(pronouns));
-                /*if (PronounsScreen.this.languageManager.getLanguage().getCode().equals(languageDefinition.getCode())) {
-                    this.setSelected(languageEntry);
-                }*/
+                var entry = new PronounsEntry(pronouns);
+                addEntry(entry);
+                if(pronouns.equals(PronounsMod.CONFIG.pronouns)) {
+                    this.setSelected(entry);
+                }
             }
 
             if (getSelectedOrNull() != null) {

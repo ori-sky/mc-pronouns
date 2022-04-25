@@ -1,5 +1,7 @@
 package mx.ori.pronouns;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -53,7 +55,8 @@ public class MessageType {
         put("multiplayer.player.left",                         index0);
     }};
 
-    public static Set<Integer> indexOf(String key) {
-        return indicesMap.get(key);
+    public @NotNull static Set<Integer> indexOf(String key) {
+        var indices = indicesMap.get(key);
+        return indices != null ? indices : new HashSet<>();
     }
 }

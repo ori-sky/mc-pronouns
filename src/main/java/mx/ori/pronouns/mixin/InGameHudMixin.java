@@ -33,7 +33,7 @@ public class InGameHudMixin {
                     String playerName = tryRegisterPronouns(tmessage);
                     if (playerName != null) {
                         if (client.player != null && !playerName.equals(client.player.getName().getString())) {
-                            var pronouns = PronounsMod.myPronouns;
+                            var pronouns = PronounsMod.CONFIG.pronouns;
                             String fmt = pronouns == null ? "/tell %s #pronouns" : "/tell %s #pronouns %s";
                             client.player.sendChatMessage(String.format(fmt, playerName, pronouns));
                         }
@@ -69,31 +69,32 @@ public class InGameHudMixin {
 
     private String tryRegisterPronouns(TranslatableText tmessage) {
         var args = tmessage.getArgs();
-        if(args[0] instanceof LiteralText lname && args[1] instanceof String line) {
-            var name = lname.getString();
+        String name = null;
+        if(args[0] instanceof LiteralText lit) {
+            name = lit.getString();
+        }
+
+        String line = null;
+        if(args[1] instanceof String str) {
+            line = str;
+        } else if(args[1] instanceof LiteralText lit) {
+            line = lit.getString();
+        }
+
+        if(name != null && line != null) {
             var words = line.split(" ");
             if(words[0].equals("#pronouns")) {
                 if(words.length >= 2) {
                     var pronouns = words[1];
                     PronounsMod.pronounsMap.put(name, pronouns);
                     LOGGER.info(String.format("registered pronouns for %s: %s", name, pronouns));
-                    return name;
                 } else {
                     PronounsMod.pronounsMap.remove(name);
-                    return name;
                 }
+                return name;
             }
         }
         return null;
-    }
-
-    private String parsePronouns(String line) {
-        var words = line.split(" ");
-        if(words.length == 2 && words[0].equals("#pronouns")) {
-            return words[1];
-        } else {
-            return null;
-        }
     }
 
     private @NotNull ArrayList<LiteralText> toReplace(Text message) {

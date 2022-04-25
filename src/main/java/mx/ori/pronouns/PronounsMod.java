@@ -1,5 +1,6 @@
 package mx.ori.pronouns;
 
+import draylar.omegaconfig.OmegaConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
@@ -12,8 +13,9 @@ import net.minecraft.text.Style;
 import java.util.HashMap;
 
 public class PronounsMod implements ClientModInitializer {
+	public static final PronounsConfig CONFIG = OmegaConfig.register(PronounsConfig.class);
+
 	public static final HashMap<String, String> pronounsMap = new HashMap<>();
-	public static String myPronouns = null;
 
 	@Override
 	public void onInitializeClient() {
@@ -21,14 +23,10 @@ public class PronounsMod implements ClientModInitializer {
 			if(screen instanceof TitleScreen) {
 				var buttons = Screens.getButtons(screen);
 
-				buttons.get(0).y -= 12;
-				buttons.get(1).y -= 12;
-				buttons.get(2).y -= 12;
-
-				final int yOffset = 6;
-				for(int i = 0; i < 7; ++i) {
-					buttons.get(i).y += yOffset;
-				}
+				buttons.get(3).y += 12;
+				buttons.get(4).y += 12;
+				buttons.get(5).y += 12;
+				buttons.get(6).y += 12;
 
 				final int width = 200;
 				var lit = new LiteralText("Pronouns").fillStyle(Style.EMPTY.withColor(0xFF7DBE));
@@ -39,8 +37,8 @@ public class PronounsMod implements ClientModInitializer {
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
 			if (client.player != null) {
-				String fmt = myPronouns == null ? "#pronouns" : "#pronouns %s";
-				client.player.sendChatMessage(String.format(fmt, myPronouns));
+				String fmt = PronounsMod.CONFIG.pronouns == null ? "#pronouns" : "#pronouns %s";
+				client.player.sendChatMessage(String.format(fmt, PronounsMod.CONFIG.pronouns));
 			}
 		});
 	}
