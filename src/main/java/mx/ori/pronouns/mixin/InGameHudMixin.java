@@ -4,6 +4,7 @@ import mx.ori.pronouns.MessageType;
 import mx.ori.pronouns.PronounsMessage;
 import mx.ori.pronouns.PronounsMod;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.text.*;
 import org.jetbrains.annotations.NotNull;
@@ -20,10 +21,13 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 @Mixin(InGameHud.class)
-public class InGameHudMixin {
+public abstract class InGameHudMixin {
     @Shadow
     @Final
     private MinecraftClient client;
+
+    @Shadow
+    public abstract ChatHud getChatHud();
 
     private final Logger LOGGER = LoggerFactory.getLogger("pronouns");
 
@@ -32,6 +36,7 @@ public class InGameHudMixin {
         if (message instanceof TranslatableText text) {
             var pm = PronounsMessage.create(text);
             if (pm != null) {
+                // respond via whisper
                 if (pm.shouldRespond()) {
                     assert client.player != null;
                     if (!pm.from().equals(client.player.getName().getString())) {
@@ -40,6 +45,8 @@ public class InGameHudMixin {
                         client.player.sendChatMessage(String.format(fmt, pm.from(), pronouns));
                     }
                 }
+
+                // register/unregister pronouns
                 if (pm.pronouns() != null) {
                     PronounsMod.pronounsMap.put(pm.from(), pm.pronouns());
                     LOGGER.info(String.format("registered pronouns for %s: %s", pm.from(), pm.pronouns()));
@@ -47,6 +54,16 @@ public class InGameHudMixin {
                     PronounsMod.pronounsMap.remove(pm.from());
                     LOGGER.info(String.format("unregistered pronouns for %s", pm.from()));
                 }
+
+                // update backlog
+                var chatLines = ((ChatHudMixin) getChatHud()).getMessages();
+                for (var line : chatLines) {
+                    if (line.getText() instanceof TranslatableText lineText) {
+                        replace(lineText);
+                    }
+                }
+                getChatHud().reset();
+
                 ci.cancel();
             } else if (text.getKey().equals("commands.message.display.outgoing")) {
                 if (text.getArgs()[1] instanceof LiteralText lit) {
@@ -57,13 +74,17 @@ public class InGameHudMixin {
                 }
             }
 
-            for (var node : toReplace(text)) {
-                var pronouns = PronounsMod.pronounsMap.get(node.getString());
-                if (pronouns != null) {
-                    var tpronouns = new TranslatableText(pronouns);
-                    var event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, tpronouns);
-                    node.fillStyle(Style.EMPTY.withHoverEvent(event));
-                }
+            replace(text);
+        }
+    }
+
+    private void replace(TranslatableText text) {
+        for (var node : toReplace(text)) {
+            var pronouns = PronounsMod.pronounsMap.get(node.getString());
+            if (pronouns != null) {
+                var tpronouns = new TranslatableText(pronouns);
+                var event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, tpronouns);
+                node.fillStyle(Style.EMPTY.withHoverEvent(event));
             }
         }
     }
