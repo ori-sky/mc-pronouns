@@ -46,29 +46,14 @@ public abstract class InGameHudMixin {
                     }
                 }
 
-                // register/unregister pronouns
-                if (pm.pronouns() != null) {
-                    PronounsMod.pronounsMap.put(pm.from(), pm.pronouns());
-                    LOGGER.info(String.format("registered pronouns for %s: %s", pm.from(), pm.pronouns()));
-                } else {
-                    PronounsMod.pronounsMap.remove(pm.from());
-                    LOGGER.info(String.format("unregistered pronouns for %s", pm.from()));
-                }
-
-                // update backlog
-                var chatLines = ((ChatHudMixin) getChatHud()).getMessages();
-                for (var line : chatLines) {
-                    if (line.getText() instanceof TranslatableText lineText) {
-                        replace(lineText);
-                    }
-                }
-                getChatHud().reset();
+                register(pm);
+                replaceBacklog();
 
                 ci.cancel();
             } else if (text.getKey().equals("commands.message.display.outgoing")) {
                 if (text.getArgs()[1] instanceof LiteralText lit) {
                     var words = lit.getString().split(" ");
-                    if (words.length == 2 && words[0].equals("#pronouns")) {
+                    if (words[0].equals("#pronouns")) {
                         ci.cancel();
                     }
                 }
@@ -76,6 +61,26 @@ public abstract class InGameHudMixin {
 
             replace(text);
         }
+    }
+
+    private void register(PronounsMessage pm) {
+        if (pm.pronouns() != null) {
+            PronounsMod.pronounsMap.put(pm.from(), pm.pronouns());
+            LOGGER.info(String.format("registered pronouns for %s: %s", pm.from(), pm.pronouns()));
+        } else {
+            PronounsMod.pronounsMap.remove(pm.from());
+            LOGGER.info(String.format("unregistered pronouns for %s", pm.from()));
+        }
+    }
+
+    private void replaceBacklog() {
+        var chatHud = getChatHud();
+        for (var line : ((ChatHudMixin) chatHud).getMessages()) {
+            if (line.getText() instanceof TranslatableText lineText) {
+                replace(lineText);
+            }
+        }
+        chatHud.reset();
     }
 
     private void replace(TranslatableText text) {
@@ -94,19 +99,20 @@ public abstract class InGameHudMixin {
 
         var key = text.getKey();
         var indices = MessageType.indexOf(key);
-        if (!indices.isEmpty()) {
-            var args = text.getArgs();
-            for (var index : indices) {
-                if (args[index] instanceof LiteralText node) {
-                    r.add(node);
-                }
+        var args = text.getArgs();
+
+        for (var index : indices) {
+            if (args[index] instanceof LiteralText node) {
+                r.add(node);
             }
-            if (key.equals("chat.type.admin")) {
-                if (args[1] instanceof TranslatableText subtext) {
-                    r.addAll(toReplace(subtext));
-                }
+        }
+        if (key.equals("chat.type.admin")) {
+            if (args[1] instanceof TranslatableText subtext) {
+                r.addAll(toReplace(subtext));
             }
-        } else {
+        }
+
+        if (indices.isEmpty()) {
             LOGGER.warn((new IllegalStateException("Unexpected key: " + key)).toString());
         }
 
