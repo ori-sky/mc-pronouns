@@ -16,7 +16,6 @@ public class MessageType {
 
     private static final HashMap<String, HashSet<Integer>> indicesMap = new HashMap<>() {{
         put("chat.type.admin",                                 index0);
-        put("chat.type.admin",                                 index0);
         put("chat.type.advancement.challenge",                 index0);
         put("chat.type.advancement.goal",                      index0);
         put("chat.type.advancement.task",                      index0);
@@ -49,7 +48,6 @@ public class MessageType {
         put("commands.message.display.incoming",               index0);
         put("commands.message.display.outgoing",               index0);
         put("commands.teleport.success.entity.single",         index01);
-        put("commands.teleport.success.entity.single",         index1);
         put("death.attack.outOfWorld",                         index0);
         put("multiplayer.player.joined",                       index0);
         put("multiplayer.player.left",                         index0);

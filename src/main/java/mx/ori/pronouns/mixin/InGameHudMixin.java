@@ -106,6 +106,7 @@ public abstract class InGameHudMixin {
                 r.add(node);
             }
         }
+
         if (key.equals("chat.type.admin")) {
             if (args[1] instanceof TranslatableText subtext) {
                 r.addAll(toReplace(subtext));
