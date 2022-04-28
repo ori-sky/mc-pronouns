@@ -46,10 +46,12 @@ public class PronounsMod implements ClientModInitializer {
 			}
 		});
 
-		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-			PronounsMod.client = client;
+		ClientPlayConnectionEvents.JOIN.register((handler, sender, cli) -> {
+			client = cli;
 			broadcast();
 		});
+
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, cli) -> pronounsMap.clear());
 	}
 
 	public static void broadcast() {
@@ -89,7 +91,7 @@ public class PronounsMod implements ClientModInitializer {
 
 	public static void replace(TranslatableText text) {
 		for (var node : toReplace(text)) {
-			var pronouns = PronounsMod.pronounsMap.get(node.getString());
+			var pronouns = pronounsMap.get(node.getString());
 			if (pronouns != null) {
 				var tpronouns = new TranslatableText(pronouns);
 				var event = new HoverEvent(HoverEvent.Action.SHOW_TEXT, tpronouns);
