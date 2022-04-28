@@ -101,24 +101,24 @@ public class PronounsMod implements ClientModInitializer {
 	private static @NotNull ArrayList<LiteralText> toReplace(TranslatableText text) {
 		var r = new ArrayList<LiteralText>();
 
-		var key = text.getKey();
-		var indices = MessageType.indexOf(key);
 		var args = text.getArgs();
 
-		for (var index : indices) {
-			if (args[index] instanceof LiteralText node) {
-				r.add(node);
-			}
-		}
-
+		var key = text.getKey();
 		if (key.equals("chat.type.admin")) {
 			if (args[1] instanceof TranslatableText subtext) {
 				r.addAll(toReplace(subtext));
 			}
 		}
 
+		var indices = MessageType.indexOf(key);
+		for (var index : indices) {
+			if (args[index] instanceof LiteralText node) {
+				r.add(node);
+			}
+		}
+
 		if (indices.isEmpty()) {
-			LOGGER.warn((new IllegalStateException("Unexpected key: " + key)).toString());
+			LOGGER.warn(String.format("Unexpected key: %s", key));
 		}
 
 		return r;
