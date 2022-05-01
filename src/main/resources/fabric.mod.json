@@ -4,7 +4,7 @@
   "version": "0.1.0",
 
   "name": "Ori's Pronouns Mod",
-  "description": "Description.",
+  "description": "This is a client-side Fabric mod that allows players to select their pronouns, as well as see the pronouns of other players using the mod.",
   "authors": [
     "Ori Sky"
   ],
