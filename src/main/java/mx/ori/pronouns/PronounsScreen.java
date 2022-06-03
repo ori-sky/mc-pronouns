@@ -6,50 +6,69 @@ import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class PronounsScreen extends GameOptionsScreen {
-    private static final ArrayList<String> pronounsCollection = new ArrayList<>() {{
-        add("any");
-        add("ae/aer");
-        add("e/em");
-        add("fae/faer");
-        add("he/him");
-        add("he/she");
-        add("he/they");
-        add("it/its");
-        add("per/per");
-        add("she/her");
-        add("she/they");
-        add("they/them");
-        add("ve/ver");
-        add("xe/xem");
-        add("zie/hir");
-        add("other");
-    }};
+    private static final String[] pronounsCollection = {
+        "any",
+        "ae/aer",
+        "e/em",
+        "fae/faer",
+        "he/him",
+        "he/she",
+        "he/they",
+        "it/its",
+        "per/per",
+        "she/her",
+        "she/they",
+        "they/them",
+        "ve/ver",
+        "xe/xem",
+        "zie/hir",
+    };
 
     private PronounsSelectionListWidget pronounsSelectionList;
+    private TextFieldWidget pronounsField;
 
     public PronounsScreen(Screen parent, GameOptions gameOptions) {
         super(parent, gameOptions, new LiteralText("Pronouns"));
     }
 
+    private void saveAndClose() {
+        String pronouns = pronounsField.getText();
+        PronounsMod.CONFIG.pronouns = pronouns.isEmpty() ? null : pronouns;
+        PronounsMod.CONFIG.save();
+        close();
+    }
+
     @Override
     protected void init() {
         pronounsSelectionList = new PronounsSelectionListWidget(client);
-        addSelectableChild(pronounsSelectionList);
-        addDrawableChild(new ButtonWidget(width / 2 - 75, height - 38, 150, 20, ScreenTexts.DONE, (button) -> {
-            var entry = pronounsSelectionList.getSelectedOrNull();
-            if(entry != null) {
-                PronounsMod.CONFIG.pronouns = entry.pronouns;
-                PronounsMod.CONFIG.save();
+        // there's 61 units between the bottom of the selection list and the bottom of the screen,
+        // so we can split it up as 7 20 7 20 7
+        pronounsField = new TextFieldWidget(textRenderer, width / 2 - 75, height - 54, 150, 20, Text.of("")) {
+            { setChangedListener(pronounsSelectionList::selectPronouns); }
+            @Override
+            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                if (keyCode == InputUtil.GLFW_KEY_ENTER) {
+                    saveAndClose();
+                    return true;
+                }
+                return super.keyPressed(keyCode, scanCode, modifiers);
             }
-            close();
+        };
+        pronounsField.setText(PronounsMod.CONFIG.pronouns);
+        addSelectableChild(pronounsSelectionList);
+        addDrawableChild(pronounsField);
+        addDrawableChild(new ButtonWidget(width / 2 - 75, height - 27, 150, 20, ScreenTexts.DONE, (button) -> {
+            saveAndClose();
         }));
         super.init();
     }
@@ -62,21 +81,25 @@ public class PronounsScreen extends GameOptionsScreen {
     }
 
     private class PronounsSelectionListWidget extends AlwaysSelectedEntryListWidget<PronounsSelectionListWidget.PronounsEntry> {
+        private PronounsEntry nullPronouns;
+        private HashMap<String, PronounsEntry> entriesMap = new HashMap<>();
+
         public PronounsSelectionListWidget(MinecraftClient client) {
             super(client, PronounsScreen.this.width, PronounsScreen.this.height, 32, PronounsScreen.this.height - 65 + 4, 18);
 
-            addEntry(new PronounsEntry());
+            nullPronouns = new PronounsEntry();
+            addEntry(nullPronouns);
             for (String pronouns : PronounsScreen.pronounsCollection) {
                 var entry = new PronounsEntry(pronouns);
                 addEntry(entry);
-                if(pronouns.equals(PronounsMod.CONFIG.pronouns)) {
-                    this.setSelected(entry);
-                }
+                entriesMap.put(pronouns, entry);
             }
+        }
 
-            if (getSelectedOrNull() != null) {
-                centerScrollOn(getSelectedOrNull());
-            }
+        public void selectPronouns(String pronouns) {
+            var selected = pronouns.isEmpty() ? nullPronouns : entriesMap.get(pronouns);
+            setSelected(selected);
+            centerScrollOn(selected);
         }
 
         @Override
@@ -101,7 +124,7 @@ public class PronounsScreen extends GameOptionsScreen {
 
 
 
-        public class PronounsEntry extends Entry<PronounsEntry> {
+        public class PronounsEntry extends AlwaysSelectedEntryListWidget.Entry<PronounsEntry> {
             final String pronouns;
 
             public PronounsEntry() {
@@ -130,6 +153,7 @@ public class PronounsScreen extends GameOptionsScreen {
 
             private void onPressed() {
                 PronounsSelectionListWidget.this.setSelected(this);
+                PronounsScreen.this.pronounsField.setText(pronouns != null ? pronouns : "");
             }
 
             @Override
