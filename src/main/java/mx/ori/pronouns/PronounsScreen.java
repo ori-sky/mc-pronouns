@@ -67,9 +67,7 @@ public class PronounsScreen extends GameOptionsScreen {
         pronounsField.setText(PronounsMod.CONFIG.pronouns);
         addSelectableChild(pronounsSelectionList);
         addDrawableChild(pronounsField);
-        addDrawableChild(new ButtonWidget(width / 2 - 75, height - 27, 150, 20, ScreenTexts.DONE, (button) -> {
-            saveAndClose();
-        }));
+        addDrawableChild(new ButtonWidget(width / 2 - 75, height - 27, 150, 20, ScreenTexts.DONE, (button) -> saveAndClose()));
         super.init();
     }
 
@@ -81,8 +79,8 @@ public class PronounsScreen extends GameOptionsScreen {
     }
 
     private class PronounsSelectionListWidget extends AlwaysSelectedEntryListWidget<PronounsSelectionListWidget.PronounsEntry> {
-        private PronounsEntry nullPronouns;
-        private HashMap<String, PronounsEntry> entriesMap = new HashMap<>();
+        private final PronounsEntry nullPronouns;
+        private final HashMap<String, PronounsEntry> entriesMap = new HashMap<>();
 
         public PronounsSelectionListWidget(MinecraftClient client) {
             super(client, PronounsScreen.this.width, PronounsScreen.this.height, 32, PronounsScreen.this.height - 65 + 4, 18);
