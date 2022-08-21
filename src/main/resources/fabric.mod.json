@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "pronouns",
-  "version": "0.1.0",
+  "version": "0.2.0",
 
   "name": "Ori's Pronouns Mod",
   "description": "This is a client-side Fabric mod that allows players to select their pronouns, as well as see the pronouns of other players using the mod.",
@@ -29,7 +29,7 @@
   "depends": {
     "fabricloader": ">=0.13.3",
     "fabric": "*",
-    "minecraft": "1.18.x",
+    "minecraft": "1.19.2",
     "java": ">=17"
   },
   "suggests": {
