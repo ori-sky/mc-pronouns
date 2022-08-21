@@ -2,7 +2,6 @@ package mx.ori.pronouns;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ScreenTexts;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -10,7 +9,7 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 
 import java.util.HashMap;
@@ -38,7 +37,7 @@ public class PronounsScreen extends GameOptionsScreen {
     private TextFieldWidget pronounsField;
 
     public PronounsScreen(Screen parent, GameOptions gameOptions) {
-        super(parent, gameOptions, new LiteralText("Pronouns"));
+        super(parent, gameOptions, Text.literal("Pronouns"));
     }
 
     private void saveAndClose() {
@@ -156,7 +155,7 @@ public class PronounsScreen extends GameOptionsScreen {
 
             @Override
             public Text getNarration() {
-                return new LiteralText(pronouns);
+                return Text.literal(pronouns);
             }
         }
     }

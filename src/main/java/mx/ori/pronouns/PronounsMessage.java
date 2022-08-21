@@ -1,38 +1,47 @@
 package mx.ori.pronouns;
 
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import org.jetbrains.annotations.Nullable;
 
 public record PronounsMessage(String from, String pronouns, boolean shouldRespond) {
     public @Nullable
-    static PronounsMessage create(TranslatableText text) {
+    static PronounsMessage create(Text text) {
         boolean shouldRespond;
 
-        var key = text.getKey();
-        switch (key) {
-            case "chat.type.text" -> shouldRespond = true;
-            case "commands.message.display.incoming" -> shouldRespond = false;
-            default -> {
-                return null;
+        if(text.getContent() instanceof TranslatableTextContent content) {
+            var key = content.getKey();
+            var args = content.getArgs();
+            String from;
+
+            switch (key) {
+                case "chat.type.text" -> {
+                    from = ((LiteralTextContent)((Text)args[0]).getContent()).string();
+                    shouldRespond = !from.equals(PronounsMod.getOwnName());
+                }
+                case "commands.message.display.incoming", "commands.message.display.outgoing" -> {
+                    from = ((LiteralTextContent)((Text)args[0]).getContent()).string();
+                    shouldRespond = false;
+                }
+                default -> {
+                    return null;
+                }
             }
-        }
 
-        var args = text.getArgs();
+            String line = null;
+            if (args[1] instanceof String str) {
+                line = str;
+            } else if(args[1] instanceof Text t && t.getContent() instanceof LiteralTextContent lit) {
+                line = lit.string();
+            }
 
-        String line = null;
-        if (args[1] instanceof String str) {
-            line = str;
-        } else if (args[1] instanceof LiteralText lit) {
-            line = lit.getString();
-        }
-
-        if (line != null) {
-            var words = line.split(" ");
-            if (words[0].equals("#pronouns") && args[0] instanceof LiteralText lit) {
-                String name = lit.getString();
-                String pronouns = words.length >= 2 ? words[1] : null;
-                return new PronounsMessage(name, pronouns, shouldRespond);
+            if (line != null) {
+                var words = line.split(" ");
+                if (words[0].equals("#pronouns")) {
+                    var pronouns = words.length >= 2 ? words[1] : null;
+                    return new PronounsMessage(from, pronouns, shouldRespond);
+                }
             }
         }
 
