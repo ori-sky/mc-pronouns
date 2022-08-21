@@ -31,14 +31,26 @@ public class PronounsMod implements ClientModInitializer {
 			if (screen instanceof TitleScreen) {
 				var buttons = Screens.getButtons(screen);
 
-				buttons.get(3).y += 12;
-				buttons.get(4).y += 12;
-				buttons.get(5).y += 12;
-				buttons.get(6).y += 12;
+				final int index_modmenu = 3;
+				int index_below = 3;
+
+				var maybeModMenuButton = buttons.get(index_modmenu);
+				if(maybeModMenuButton.getMessage().getContent() instanceof TranslatableTextContent content && content.getKey().equals("modmenu.title")) {
+					for(int i = 0; i <= index_modmenu; ++i) {
+						buttons.get(i).y -= 12;
+					}
+					++index_below;
+				}
+
+				buttons.get(index_below).y += 12;
+				buttons.get(index_below + 1).y += 12;
+				buttons.get(index_below + 2).y += 12;
+				buttons.get(index_below + 3).y += 12;
+				buttons.get(index_below + 4).y += 12;
 
 				final int width = 200;
 				var lit = Text.literal("Pronouns").fillStyle(Style.EMPTY.withColor(0xFF7DBE));
-				var button = new ButtonWidget(scaledWidth / 2 - width / 2, buttons.get(2).y + 24, width, 20, lit, ignore -> client.setScreen(new PronounsScreen(screen, client.options)));
+				var button = new ButtonWidget(scaledWidth / 2 - width / 2, buttons.get(index_below).y - 24, width, 20, lit, ignore -> client.setScreen(new PronounsScreen(screen, client.options)));
 				Screens.getButtons(screen).add(button);
 			}
 		});
